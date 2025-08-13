@@ -1,0 +1,82 @@
+/**
+ * style.css
+ *
+ * Styles for the Zscaler detection "toast" notification.
+ */
+
+/* Keyframes for the flashing background effect */
+@keyframes flashRed {
+  50% {
+    background-color: #D32F2F; /* A strong red color */
+    border-color: #B71C1C;
+  }
+}
+
+/* The main banner container */
+.zscaler-banner-ext {
+  position: fixed;
+  width: auto;
+  max-width: 350px;
+  background-color: #333;
+  color: #fff;
+  border: 2px solid #555;
+  border-radius: 8px;
+  padding: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  z-index: 2147483647; /* Max z-index to ensure it's on top */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+
+  /* --- Animation Logic --- */
+  opacity: 0;
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s;
+}
+
+/* --- Position and Animation States --- */
+
+/* Bottom Right (Default) */
+.zscaler-banner-ext.bottom-right { bottom: 20px; right: 20px; transform: translateX(120%); }
+.zscaler-banner-ext.bottom-right.visible { transform: translateX(0); }
+
+/* Bottom Left */
+.zscaler-banner-ext.bottom-left { bottom: 20px; left: 20px; transform: translateX(-120%); }
+.zscaler-banner-ext.bottom-left.visible { transform: translateX(0); }
+
+/* Top Right */
+.zscaler-banner-ext.top-right { top: 20px; right: 20px; transform: translateX(120%); }
+.zscaler-banner-ext.top-right.visible { transform: translateX(0); }
+
+/* Top Left */
+.zscaler-banner-ext.top-left { top: 20px; left: 20px; transform: translateX(-120%); }
+.zscaler-banner-ext.top-left.visible { transform: translateX(0); }
+
+
+/* When the 'visible' class is added, move the banner on-screen and start flashing */
+.zscaler-banner-ext.visible {
+  opacity: 1;
+  animation: flashRed 1.5s infinite ease-in-out;
+}
+
+.zscaler-banner-ext-icon {
+  font-size: 20px;
+}
+
+/* The close button for the banner */
+.zscaler-banner-ext-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #aaa;
+  cursor: pointer;
+  padding: 0 0 0 10px;
+  margin-left: auto; /* Pushes the button to the far right */
+}
+
+.zscaler-banner-ext-close:hover {
+  color: #fff;
+}

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Zscaler Detector Options</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 10px 20px; width: 350px; background-color: #f4f4f4; }
+    h1 { font-size: 1.2em; color: #333; }
+    .option { margin-bottom: 20px; background-color: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
+    select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+    #bannerEnabledLabel { display: flex; align-items: center; cursor: pointer; }
+    #bannerEnabled { margin-right: 10px; }
+    button { background-color: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 1em; }
+    button:hover { background-color: #0056b3; }
+    #status { margin-top: 15px; color: #28a745; font-weight: bold; height: 20px; transition: opacity 0.5s; }
+  </style>
+</head>
+<body>
+  <h1>Zscaler Detector Options</h1>
+
+  <div class="option">
+    <label id="bannerEnabledLabel">
+      <input type="checkbox" id="bannerEnabled"> Show notification banner
+    </label>
+  </div>
+
+  <div class="option">
+    <label for="bannerPosition">Banner Position:</label>
+    <select id="bannerPosition">
+      <option value="bottom-right">Bottom Right</option>
+      <option value="bottom-left">Bottom Left</option>
+      <option value="top-right">Top Right</option>
+      <option value="top-left">Top Left</option>
+    </select>
+  </div>
+
+  <button id="save">Save Settings</button>
+  <div id="status"></div>
+
+  <script src="options.js"></script>
+</body>
+</html>
