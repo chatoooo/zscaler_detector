@@ -61,7 +61,7 @@ if __name__ == '__main__':
                 is_intercepted = False
                 if issuer and 'zscaler' in issuer.lower():
                     is_intercepted = True
-                
+
                 send_message({"intercepted": is_intercepted, "issuer": issuer or "N/A"})
             else:
                 send_message({"intercepted": False, "error": "No hostname provided"})

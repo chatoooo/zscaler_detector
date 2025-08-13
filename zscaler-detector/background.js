@@ -2,13 +2,10 @@
  * background.js
  *
  * Manages icon state and communicates with a native messaging host.
+ * Uses chrome.storage.session to persist data across service worker restarts.
  */
 
 const NATIVE_HOST_NAME = 'com.github.chatoooo.zscaler_detector';
-
-// Caches to store status and avoid re-checking.
-const interceptionStatusCache = new Map(); // key: hostname, value: { isIntercepted: boolean, timestamp: number }
-const tabHostnameCache = new Map(); // key: tabId, value: hostname
 
 // --- Icon Paths ---
 const ICONS = {
@@ -31,144 +28,136 @@ const ICONS = {
 
 // --- Event Listeners ---
 
-// 1. Listen for tab updates. This is now the main trigger.
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  // When a tab starts loading a new page, reset its icon.
+// 1. Listen for tab updates. This is the main trigger.
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'loading') {
-    resetIcon(tabId);
+    await resetIcon(tabId);
   }
-
-  // When a tab finishes loading and has a valid URL, check its status.
   if (changeInfo.status === 'complete' && tab.url && tab.url.startsWith('http')) {
     const hostname = new URL(tab.url).hostname;
-    checkAndupdateUi(hostname, tabId);
+    await checkAndupdateUi(hostname, tabId);
   }
 });
 
 // 2. Update icon when user switches to a different tab.
-chrome.tabs.onActivated.addListener((activeInfo) => {
+chrome.tabs.onActivated.addListener(async (activeInfo) => {
   const tabId = activeInfo.tabId;
-  const hostname = tabHostnameCache.get(tabId);
-  updateUiForTab(tabId, hostname);
+  const data = await chrome.storage.session.get(['tabHostnames', 'interceptionStatusCache']);
+  const tabHostnames = data.tabHostnames || {};
+  const interceptionStatusCache = data.interceptionStatusCache || {};
+  const hostname = tabHostnames[tabId];
+  await updateUiForTab(tabId, hostname, interceptionStatusCache);
 });
 
-// 3. Clean up cache when a tab is closed.
-chrome.tabs.onRemoved.addListener((tabId) => {
-  tabHostnameCache.delete(tabId);
+// 3. Clean up storage when a tab is closed.
+chrome.tabs.onRemoved.addListener(async (tabId) => {
+  const data = await chrome.storage.session.get('tabHostnames');
+  const tabHostnames = data.tabHostnames || {};
+  if (tabHostnames[tabId]) {
+    delete tabHostnames[tabId];
+    await chrome.storage.session.set({ tabHostnames });
+  }
 });
 
 // --- Core Logic ---
 
 /**
- * Checks the interception status (using cache or native app) and updates the UI.
+ * Checks the interception status and updates the UI.
  * @param {string} hostname The hostname to check.
  * @param {number} tabId The ID of the tab.
  */
-function checkAndupdateUi(hostname, tabId) {
-  // Store the hostname for the current tab for quick lookups on tab switch.
-  tabHostnameCache.set(tabId, hostname);
+async function checkAndupdateUi(hostname, tabId) {
+  // Update the hostname for this tab in session storage.
+  let { tabHostnames = {} } = await chrome.storage.session.get('tabHostnames');
+  tabHostnames[tabId] = hostname;
+  await chrome.storage.session.set({ tabHostnames });
 
-  const cachedData = interceptionStatusCache.get(hostname);
-  const cacheMaxAge = 3600 * 1000; // 1 hour in milliseconds
+  let { interceptionStatusCache = {} } = await chrome.storage.session.get('interceptionStatusCache');
+  const cachedData = interceptionStatusCache[hostname];
+  const cacheMaxAge = 3600 * 1000; // 1 hour
 
-  // If we have a fresh cached result, use it.
   if (cachedData && (Date.now() - cachedData.timestamp < cacheMaxAge)) {
-    updateIcon(tabId, cachedData.isIntercepted);
-    // Banner is not shown for cached results to be less intrusive.
+    await updateIcon(tabId, cachedData.isIntercepted);
     return;
   }
 
-  // Otherwise (no cache or stale cache), ask the native app.
+  // Ask the native app.
   chrome.runtime.sendNativeMessage(
-    NATIVE_HOST_NAME,
-    { hostname: hostname },
-    (response) => {
-      // It's possible the tab was closed before the native app responds.
-      // The check inside updateIcon will handle this gracefully.
-      if (chrome.runtime.lastError) {
-        console.error(`[Extension] Error: ${chrome.runtime.lastError.message}`);
-        // interceptionStatusCache.set(hostname, { isIntercepted: false, timestamp: Date.now() });
-        // updateIcon(tabId, false);
-        return;
-      }
+      NATIVE_HOST_NAME,
+      { hostname: hostname },
+      async (response) => {
+        if (chrome.runtime.lastError) {
+          console.error(`[Extension] Error: ${chrome.runtime.lastError.message}`);
+          interceptionStatusCache[hostname] = { isIntercepted: false, timestamp: Date.now() };
+          await chrome.storage.session.set({ interceptionStatusCache });
+          await updateIcon(tabId, false);
+          return;
+        }
 
-      const isIntercepted = response && response.intercepted === true;
-      interceptionStatusCache.set(hostname, { isIntercepted: isIntercepted, timestamp: Date.now() });
-      
-      updateIcon(tabId, isIntercepted);
-      
-      // ONLY show the banner on the first detection within a cache cycle.
-      if (isIntercepted) {
-        injectBanner(tabId);
+        const isIntercepted = response && response.intercepted === true;
+        interceptionStatusCache[hostname] = { isIntercepted, timestamp: Date.now() };
+        await chrome.storage.session.set({ interceptionStatusCache });
+
+        await updateIcon(tabId, isIntercepted);
+
+        if (isIntercepted) {
+          await injectBanner(tabId);
+        }
       }
-    }
   );
 }
 
-
 /**
- * Updates the UI for a tab, typically on tab switch.
+ * Updates the UI for a tab based on stored data.
  * @param {number} tabId The ID of the tab.
  * @param {string} hostname The hostname associated with the tab.
+ * @param {object} interceptionStatusCache The cache of interception statuses.
  */
-function updateUiForTab(tabId, hostname) {
-  if (hostname && interceptionStatusCache.has(hostname)) {
-    const cachedData = interceptionStatusCache.get(hostname);
-    updateIcon(tabId, cachedData.isIntercepted);
+async function updateUiForTab(tabId, hostname, interceptionStatusCache) {
+  if (hostname && interceptionStatusCache[hostname]) {
+    const cachedData = interceptionStatusCache[hostname];
+    await updateIcon(tabId, cachedData.isIntercepted);
   } else {
-    resetIcon(tabId);
+    await resetIcon(tabId);
   }
 }
 
 // --- UI Functions ---
 
-/**
- * Sets the extension icon based on interception status.
- * @param {number} tabId The ID of the tab.
- * @param {boolean} isIntercepted The status of the connection.
- */
-function updateIcon(tabId, isIntercepted) {
-  // First, check if the tab still exists.
-  chrome.tabs.get(tabId, (tab) => {
-    // If the tab is gone, or there was an error, just do nothing.
-    if (chrome.runtime.lastError || !tab) {
-      return;
+async function updateIcon(tabId, isIntercepted) {
+  try {
+    const tab = await chrome.tabs.get(tabId);
+    if (tab) {
+      const iconPath = isIntercepted ? ICONS.INTERCEPTED : ICONS.SAFE;
+      await chrome.action.setIcon({ tabId: tabId, path: iconPath });
     }
-    // If the tab exists, proceed with setting the icon.
-    const iconPath = isIntercepted ? ICONS.INTERCEPTED : ICONS.SAFE;
-    chrome.action.setIcon({ tabId: tabId, path: iconPath });
-  });
+  } catch (error) {
+    // Tab was likely closed, which is fine.
+  }
 }
 
-/**
- * Resets the extension icon to its default state.
- * @param {number} tabId The ID of the tab.
- */
-function resetIcon(tabId) {
-  chrome.tabs.get(tabId, (tab) => {
-    if (chrome.runtime.lastError || !tab) return;
-    chrome.action.setIcon({ tabId: tabId, path: ICONS.DEFAULT });
-  });
+async function resetIcon(tabId) {
+  try {
+    const tab = await chrome.tabs.get(tabId);
+    if (tab) {
+      await chrome.action.setIcon({ tabId: tabId, path: ICONS.DEFAULT });
+    }
+  } catch (error) {
+    // Tab was likely closed.
+  }
 }
 
-/**
- * Injects the banner into the page if enabled in settings.
- * @param {number} tabId The ID of the tab.
- */
-function injectBanner(tabId) {
-  chrome.storage.sync.get({ bannerEnabled: true }, (items) => {
-    if (items.bannerEnabled) {
-      chrome.tabs.get(tabId, (tab) => {
-        if (chrome.runtime.lastError || !tab) return;
-        chrome.scripting.insertCSS({
-          target: { tabId: tabId },
-          files: ['style.css'],
-        });
-        chrome.scripting.executeScript({
-          target: { tabId: tabId },
-          files: ['content.js'],
-        });
-      });
+async function injectBanner(tabId) {
+  const { bannerEnabled = true } = await chrome.storage.sync.get('bannerEnabled');
+  if (bannerEnabled) {
+    try {
+      const tab = await chrome.tabs.get(tabId);
+      if (tab) {
+        await chrome.scripting.insertCSS({ target: { tabId: tabId }, files: ['style.css'] });
+        await chrome.scripting.executeScript({ target: { tabId: tabId }, files: ['content.js'] });
+      }
+    } catch (error) {
+      // Tab was likely closed.
     }
-  });
+  }
 }
