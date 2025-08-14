@@ -40,7 +40,7 @@ The extension requires a local helper application to check SSL certificates.
 
 ### Easy Installation (Recommended)
 
-The helper scripts are located in the main project folder (`zscaler_detector-main`).
+The helper scripts are located in the main project folder (`zscaler_detector`).
 
 #### For Windows
 
