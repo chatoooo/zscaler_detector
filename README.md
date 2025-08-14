@@ -1,103 +1,69 @@
-# Zscaler Detector - Helper App Installation
+# Zscaler Detector - Full Installation Guide
 
-This document provides instructions on how to install the local Python helper application required for the "Zscaler Intercept Detector" Chrome extension to function correctly.
+This document provides complete instructions on how to install both the Chrome extension and the local Python helper application from the official GitHub repository.
 
 ---
 
-## Prerequisites
+## Part 1: Get the Project Files
+
+First, you need to get all the project files from GitHub.
+
+1.  **Go to the GitHub repository:** [https://github.com/chatoooo/zscaler_detector](https://github.com/chatoooo/zscaler_detector)
+2.  Click the green **`< > Code`** button.
+3.  Choose one of the following methods:
+    * **Download ZIP:** Click **"Download ZIP"**. Unzip the downloaded file to a permanent location on your computer (e.g., `C:\Tools\` or `~/`).
+    * **Clone (for Git users):** Copy the repository URL and run `git clone https://github.com/chatoooo/zscaler_detector.git` in your terminal.
+
+You will now have a main `zscaler_detector` folder, which contains the `zscaler-detector` subfolder with all the extension files.
+
+---
+
+## Part 2: Install the Chrome Extension
+
+1.  **Open Chrome Extensions:** Open Chrome and navigate to `chrome://extensions`.
+2.  **Enable Developer Mode:** In the top-right corner, turn on the "Developer mode" toggle.
+3.  **Load Unpacked:** Click on "**Load unpacked**".
+4.  **Select Folder:** In the file selection dialog, navigate to and select the **`zscaler-detector`** subfolder (the one inside `zscaler_detector`).
+
+The extension is now installed. Note the **ID** of the extension on its card; you will need it for the next part.
+
+---
+
+## Part 3: Install the Helper App
+
+The extension requires a local helper application to check SSL certificates.
+
+### Prerequisites
 
 - **Python 3:** Required to run the helper script. Download from [python.org](https://www.python.org/).
-  - **On Windows:** Ensure you check the box **"Add Python to PATH"** during installation.
-- **Google Chrome:** The browser this extension is designed for.
+    - **On Windows:** Ensure you check the box **"Add Python to PATH"** during installation.
 
----
+### Easy Installation (Recommended)
 
-## Easy Installation (Recommended)
+The helper scripts are located in the main project folder (`zscaler_detector-main`).
 
-The easiest way to install the helper app is to use the provided scripts.
+#### For Windows
 
-### For Windows
-
-1.  Place the `install_helper_windows.ps1` and `zscaler_detector.py` files in the same permanent folder.
+1.  Navigate to the main project folder (`zscaler_detector`).
 2.  Right-click on `install_helper_windows.ps1` and select **"Run with PowerShell"**.
-3.  The script will ask for your Chrome Extension ID. Open Chrome, go to `chrome://extensions`, find the "Zscaler Intercept Detector" extension, and copy its ID.
-4.  Paste the ID into the PowerShell window and press Enter.
-5.  The script will handle the rest automatically.
+3.  The script will ask for your Chrome Extension ID. Paste the ID you copied from the `chrome://extensions` page and press Enter.
+4.  The script will handle the rest automatically.
 
-### For macOS & Linux
+#### For macOS & Linux
 
-1.  Place the `install_helper_macos_linux.sh` and `zscaler_detector.py` files in the same permanent folder (e.g., `~/zscaler-detector`).
-2.  Open a **Terminal**.
-3.  Navigate to the folder where you saved the files (e.g., `cd ~/zscaler-detector`).
-4.  Make the installation script executable by running:
+1.  Open a **Terminal** and navigate to the main project folder (e.g., `cd ~/zscaler_detector`).
+2.  Make the installation script executable by running:
     ```bash
     chmod +x install_helper_macos_linux.sh
     ```
-5.  Run the script:
+3.  Run the script:
     ```bash
     ./install_helper_macos_linux.sh
     ```
-6.  The script will prompt you for your Chrome Extension ID. Find it on the `chrome://extensions` page, then paste it into the terminal and press Enter.
+4.  The script will prompt you for your Chrome Extension ID. Paste the ID you copied from the `chrome://extensions` page and press Enter.
 
 ---
 
-## Manual Installation
+## Final Step
 
-If you prefer to install manually, follow these steps.
-
-### Step 1: Save the Python Script
-
-Save `zscaler_detector.py` to a permanent location on your computer.
-
-### Step 2: Create the Native Messaging Manifest
-
-In the same folder, create a file named `com.github.chatoooo.zscaler_detector.json` with the following content:
-
-```json
-{
-  "name": "com.github.chatoooo.zscaler_detector",
-  "description": "Zscaler Detector Helper",
-  "path": "FULL_PATH_TO_YOUR_SCRIPT",
-  "type": "stdio",
-  "allowed_origins": [
-    "chrome-extension://YOUR_EXTENSION_ID_HERE/"
-  ]
-}
-```
-
-You must edit two lines:
-
-`path`: Replace `FULL_PATH_TO_YOUR_SCRIPT` with the absolute path to `zscaler_detector.py`.
-
-Windows Example: `"C:\\Tools\\zscaler-detector\\zscaler_detector.py"`
-
-macOS/Linux Example: `"/Users/yourusername/zscaler-detector/zscaler_detector.py"`
-
-`allowed_origins`: Replace `YOUR_EXTENSION_ID_HERE` with the ID from the `chrome://extensions` page.
-
-### Step 3: Register the Manifest File
-#### Windows
-Open Registry Editor (`regedit`).
-
-Navigate to `HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts`.
-
-Create a new key named `com.github.chatoooo.zscaler_detector`.
-
-Set the `(Default)` value of this new key to the full path of your `.json` manifest file.
-
-#### macOS
-Open Terminal.
-
-Run: `mkdir -p "$HOME/Library/Application Support/Google/Chrome/NativeMessagingHosts"`
-
-Run: `cp /path/to/your/com.github.chatoooo.zscaler_detector.json "$HOME/Library/Application Support/Google/Chrome/NativeMessagingHosts/"`
-
-#### Linux
-Open Terminal.
-
-Run: `mkdir -p "$HOME/.config/google-chrome/NativeMessagingHosts"`
-
-Run: `cp /path/to/your/com.github.chatoooo.zscaler_detector.json "$HOME/.config/google-chrome/NativeMessagingHosts/"`
-
-### Final Step
-After either the easy or manual installation, **restart Google Chrome completely**. The extension should now function correctly.
+After the installation script finishes, **restart Google Chrome completely**. The extension should now be fully functional. You can configure the banner's visibility and position by right-clicking the extension icon and selecting "Options".
