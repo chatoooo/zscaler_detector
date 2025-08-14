@@ -76,7 +76,7 @@ macOS/Linux Example: `"/Users/yourusername/zscaler-detector/zscaler_detector.py"
 `allowed_origins`: Replace `YOUR_EXTENSION_ID_HERE` with the ID from the `chrome://extensions` page.
 
 ### Step 3: Register the Manifest File
-## Windows
+#### Windows
 Open Registry Editor (`regedit`).
 
 Navigate to `HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts`.
@@ -85,14 +85,14 @@ Create a new key named `com.github.chatoooo.zscaler_detector`.
 
 Set the `(Default)` value of this new key to the full path of your `.json` manifest file.
 
-## macOS
+#### macOS
 Open Terminal.
 
 Run: `mkdir -p "$HOME/Library/Application Support/Google/Chrome/NativeMessagingHosts"`
 
 Run: `cp /path/to/your/com.github.chatoooo.zscaler_detector.json "$HOME/Library/Application Support/Google/Chrome/NativeMessagingHosts/"`
 
-## Linux
+#### Linux
 Open Terminal.
 
 Run: `mkdir -p "$HOME/.config/google-chrome/NativeMessagingHosts"`
