@@ -38,19 +38,18 @@ if [ -z "$EXTENSION_ID" ]; then
     exit 1
 fi
 
-# Create the manifest file content
-MANIFEST_JSON="{\
-  \"name\": \"$HOST_NAME\",\
-  \"description\": \"Zscaler Detector Helper\",\
-  \"path\": \"$PYTHON_SCRIPT_PATH\",\
-  \"type\": \"stdio\",\
-  \"allowed_origins\": [\
-    \"chrome-extension://$EXTENSION_ID/\"\
-  ]\
-}"
-
-# Write the manifest file
-echo "$MANIFEST_JSON" > "$TARGET_DIR/$HOST_NAME.json"
+# Create the manifest file
+cat > "$TARGET_DIR/$HOST_NAME.json" << EOF
+{
+  "name": "$HOST_NAME",
+  "description": "Zscaler Detector Helper",
+  "path": "$PYTHON_SCRIPT_PATH",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://$EXTENSION_ID/"
+  ]
+}
+EOF
 
 # Make the python script executable
 chmod +x "$PYTHON_SCRIPT_PATH"
