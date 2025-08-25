@@ -51,7 +51,7 @@ The helper scripts are located in the main project folder (`zscaler_detector`).
 
 #### For macOS & Linux
 
-1.  Open a **Terminal** and navigate to the main project folder (e.g., `cd ~/zscaler_detector`).
+1.  Open a **Terminal** and navigate to the main project folder (e.g., `cd ~/Downloads/zscaler_detector`).
 2.  Make the installation script executable by running:
     ```bash
     chmod +x install_helper_macos_linux.sh
@@ -66,4 +66,6 @@ The helper scripts are located in the main project folder (`zscaler_detector`).
 
 ## Final Step
 
-After the installation script finishes, **restart Google Chrome completely**. The extension should now be fully functional. You can configure the banner's visibility and position by right-clicking the extension icon and selecting "Options".
+After the installation script finishes, **restart Google Chrome completely**. The extension should now be fully functional. You can configure the banner, blocklist, and other settings by right-clicking the extension icon and selecting "Options".
+
+The default domain list is now automatically updated and merged with your custom list when you update the extension, so you'll always have the latest recommendations without losing your own entries.

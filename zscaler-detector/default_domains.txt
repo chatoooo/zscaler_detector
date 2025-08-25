@@ -1,0 +1,39 @@
+# USA
+etrade.com
+ml.com
+interactivebrokers.com
+schwab.com
+fidelity.com
+vanguard.com
+bankofamerica.com
+chase.com
+wellsfargo.com
+citi.com
+
+# Czechia
+csas.cz
+kb.cz
+csob.cz
+rb.cz
+fio.cz
+
+# Slovakia
+slsp.sk
+vub.sk
+tatrabanka.sk
+csob.sk
+
+# Poland
+pkobp.pl
+pekao.com.pl
+santander.pl
+mbank.pl
+ing.pl
+
+# Germany
+db.com
+commerzbank.de
+dzbank.de
+kfw.de
+n26.com
+sparkasse.de

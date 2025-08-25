@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Connection Warning</title>
+    <link rel="stylesheet" href="confirmation.css">
+</head>
+<body>
+<div class="container">
+    <div class="icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+        </svg>
+    </div>
+    <h1>Security Warning</h1>
+    <p>You are trying to visit:</p>
+    <p class="hostname" id="hostname"></p>
+    <p>This site is on your blocklist and the connection appears to be intercepted. This may not be secure.</p>
+
+    <div class="remember-choice">
+        <input type="checkbox" id="remember">
+        <label for="remember">Remember my choice for this site</label>
+    </div>
+
+    <div class="buttons">
+        <button id="goBack">Go Back</button>
+        <button id="proceed" class="proceed">Proceed Anyway</button>
+    </div>
+</div>
+<script src="confirmation.js"></script>
+</body>
+</html>
