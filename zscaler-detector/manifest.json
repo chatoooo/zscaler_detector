@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Zscaler Intercept Detector (Native)",
-  "version": "1.4",
+  "version": "1.5.0",
   "description": "Uses a local helper app to detect when connections are intercepted by a proxy.",
   "permissions": [
     "nativeMessaging",
